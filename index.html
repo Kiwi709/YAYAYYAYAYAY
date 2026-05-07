@@ -1,269 +1,448 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Love You</title>
+    <title>A Message for You</title>
     <style>
         :root {
-            --pink: #ff4d6d;
-            --bg: #fff0f3;
+            --sunflower-yellow: #ffc300;
+            --deep-rose: #b56576;
+            --cream: #fffaf0;
+            --stem-green: #606c38;
+            --env-front: #f0e6d2;
+            --env-back: #e0d8c2;
+            --env-flap: #d4af37;
         }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--cream);
+            font-family: 'Georgia', serif;
+            color: #333;
             margin: 0;
-            background-color: var(--bg);
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
-        .hero {
-            height: 100vh;
+
+        /* Envelope Styling */
+        .envelope-wrapper {
+            height: 380px;
+            margin-top: 10vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .envelope {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background: var(--env-back);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: all 0.5s;
+        }
+
+        .letter-preview {
+            position: absolute;
+            top: 5px; 
+            left: 10px; 
+            width: 280px; 
+            height: 180px;
+            background: white;
+            z-index: 2;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.5s ease;
+            text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: white;
-            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .gif-container {
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            z-index: 4;
+            border-style: solid;
+            border-width: 0 150px 100px 150px;
+            border-color: transparent transparent #e6ddc5 transparent;
+            bottom: 0; left: 0;
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            z-index: 3;
+            border-style: solid;
+            border-width: 100px 150px 100px 0;
+            border-color: #f7edd8 transparent #f7edd8 #f7edd8;
+            top: 0; right: 0;
+        }
+
+        .flap {
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 0;
+            border-style: solid;
+            border-width: 100px 150px 0 150px;
+            border-color: var(--env-flap) transparent transparent transparent;
+            z-index: 5;
+            transform-origin: top;
+            transition: transform 0.4s ease;
+        }
+
+        .envelope-wrapper:hover .flap { transform: rotateX(160deg); z-index: 1; }
+        .envelope-wrapper:hover .letter-preview { transform: translateY(-80px); }
+        .envelope-wrapper.open .envelope { transform: translateY(100vh) scale(0.5); opacity: 0; pointer-events: none; }
+
+        .content-container {
             width: 100%;
-            max-width: 400px;
-            margin-bottom: 20px;
-            min-height: 250px;
-        }
-        #typing-text {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: var(--pink);
-            margin-bottom: 30px;
-            min-height: 1.5em;
-            display: flex;
-            justify-content: center;
+            display: none;
+            opacity: 0;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            padding-bottom: 80px;
         }
-        .heart-with-a {
-            position: relative;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
+
+        .content-container.visible { display: flex; opacity: 1; transition: opacity 1.5s ease-in; }
+
+        .section {
+            width: 90%;
+            max-width: 650px;
+            margin: 30px 0;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .letter-paper {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border-radius: 2px;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .heart-a {
+            color: #ff4d6d;
             font-size: 2.5rem;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
             line-height: 1;
         }
-        .heart-with-a .inner-a {
+
+        .heart-a::after {
+            content: 'A';
             position: absolute;
+            left: 50%; top: 45%;
+            transform: translate(-50%, -50%);
             font-size: 0.9rem;
             color: white;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-weight: bold;
-            margin-top: -4px;
-        }
-        .main-btn {
-            background: var(--pink);
-            color: white;
-            border: none;
-            padding: 20px 60px;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
-            position: relative;
-            z-index: 1000;
-        }
-        #scroll-hint {
-            display: none;
-            font-size: 1.2rem;
-            color: var(--pink);
-            font-weight: bold;
-            margin-top: 20px;
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-10px);}
-            60% {transform: translateY(-5px);}
-        }
-        .heart-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-        }
-        .heart {
-            position: absolute;
-            bottom: -10%;
-            font-size: 2rem;
-            animation: floatUp 4s linear forwards;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .heart-char {
-            position: absolute;
-            font-size: 0.8rem;
-            color: white;
-            font-weight: bold;
             font-family: Arial, sans-serif;
-            transform: translateY(-2px);
+            font-weight: bold;
         }
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+
+        .description-box {
+            background: #fffdf5;
+            border: 1px solid #f0e6d2;
+            padding: 40px;
+            border-radius: 15px;
+            font-style: italic;
+            color: #444;
+            line-height: 1.8;
         }
-        #hidden-content {
-            display: none;
-            padding: 50px 20px 100px 20px;
-        }
-        .gallery {
+
+        .polaroid-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 25px;
-            margin: 40px auto;
-            max-width: 1200px;
         }
-        .card {
+
+        .polaroid {
             background: white;
-            padding: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            width: 320px;
+            padding: 15px 15px 40px 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            width: 270px;
+        }
+
+        .polaroid img { width: 100%; height: 270px; object-fit: cover; }
+        .polaroid p { font-family: 'Courier New', Courier, monospace; margin-top: 15px; font-size: 0.85rem; line-height: 1.4; }
+
+        .pardon-btn, .reason-btn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px auto;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+            font-family: Georgia, serif;
+        }
+
+        .reason-btn { padding: 15px 40px; font-size: 1rem; }
+
+        .reason-box {
+            background: #fffdf5;
+            border: 1px solid #f0e6d2;
+            padding: 30px;
             border-radius: 10px;
+            margin-top: 15px;
+            font-style: italic;
+            color: #444;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .card img { 
-            width: 100%; 
-            height: 350px; 
-            object-fit: cover; 
-            border-radius: 5px; 
+
+        .reason-box.show { opacity: 1; transform: scale(1); }
+
+        .handwritten-note {
+            animation: fadeIn 2s;
+            font-family: 'Brush Script MT', cursive;
+            font-size: 2.2rem;
+            color: var(--deep-rose);
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #f0e6d2;
+            display: inline-block;
+            border-radius: 2px;
+            text-align: center;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         #countdown {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-top: 40px;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
+
         .time-box {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            min-width: 85px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            background: var(--stem-green);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 75px;
         }
-        .time-num { font-size: 2.5rem; font-weight: bold; color: var(--pink); display: block; }
-        .time-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
-        .header-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
+
+        .time-num { font-size: 2rem; display: block; font-weight: bold; }
+        .time-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        footer { margin-top: 50px; padding: 20px; color: #aaa; font-size: 0.8rem; text-align: center; width: 100%;}
+
+        .petal {
+            position: fixed;
+            font-size: 18px;
+            color: #d4af37;
+            pointer-events: none;
+            user-select: none;
+            animation: fall 1s ease-out forwards;
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(0) rotate(0deg); opacity: 1; }
+            to { transform: translateY(50px) rotate(180deg); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="heart-container" id="heart-box"></div>
-
-    <section class="hero">
-        <div class="gif-container" id="main-gif-box">
-            <div class="tenor-gif-embed" data-postid="10627323285930200709" data-share-method="host" data-aspect-ratio="0.901639" data-width="100%">
-                <a href="https://tenor.com/view/sorry-gif-10627323285930200709">Sorry Sticker</a>
+    <div class="envelope-wrapper" id="envelopeWrapper" onclick="openLetter()">
+        <div class="envelope">
+            <div class="flap"></div>
+            <div class="pocket"></div>
+            <div class="letter-preview">
+                <p style="color: var(--deep-rose); margin: 0; font-size: 1.1rem; font-weight: bold;">Click to open...</p>
+                <div style="font-size: 3rem; margin-top: 10px;">🌻</div>
             </div>
-            <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
-        </div>
-
-        <div id="typing-text"></div>
-        <button id="mainBtn" class="main-btn" onclick="revealSurprise()">Click if you still love me</button>
-        <div id="scroll-hint">YAYAYAYYAYAYAYY! Scroll down to see your surprises... ↓</div>
-    </section>
-
-    <div id="hidden-content">
-        <div class="header-container">
-            <h2 style="color: var(--pink); font-size: 2.5rem; margin: 0;">For My Favorite Person</h2>
-            <span class="heart-with-a">❤️<span class="inner-a">A</span></span>
-        </div>
-        
-        <div class="gallery">
-            <div class="card">
-                <img src="Images/Image1.jpg" alt="Memory 1">
-                <p>Every moment with you is a gift ✨</p>
-            </div>
-            <div class="card">
-                <img src="Images/Image2.jpg" alt="Memory 2">
-                <p>Better together, always 💖</p>
-            </div>
-        </div>
-
-        <div style="max-width: 700px; margin: 40px auto;">
-            <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/3q6NhHBML1exmXhMiIEHeR?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        </div>
-
-        <h2 style="color: var(--pink); font-size: 2.5rem; margin-top: 60px;">Our Anniversary</h2>
-        <div id="countdown">
-            <div class="time-box"><span id="days" class="time-num">00</span><span class="time-label">Days</span></div>
-            <div class="time-box"><span id="hours" class="time-num">00</span><span class="time-label">Hrs</span></div>
-            <div class="time-box"><span id="mins" class="time-num">00</span><span class="time-label">Min</span></div>
-            <div class="time-box"><span id="secs" class="time-num">00</span><span class="time-label">Sec</span></div>
         </div>
     </div>
 
+    <div class="content-container" id="contentContainer">
+        <section class="section">
+            <div class="letter-paper">
+                <div class="heart-a">❤️</div>
+                <p>I’ve been doing a lot of thinking. I realised I’ve been taking things for granted lately, and I never want to do that again. More than anything, I’ve learned that I never want to spend a single day without hearing your voice.</p>
+                <p>I want to be more present. I want to be better for you. I know I messed up, and I truly hate that I caused you any sadness. Please forgive me?</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h3 style="font-style: italic; color: var(--stem-green); font-weight: normal; margin-bottom: 5px;">Just in case you forgot...</h3>
+            <p id="counter" style="font-size: 0.8rem; color: #999; margin-bottom: 15px;">(Click to find all 18 smiles!)</p>
+            <button class="reason-btn" id="smileBtn" onclick="showReason()">Click for a Smile</button>
+            <div class="reason-box" id="reasonBox"></div>
+        </section>
+
+        <section class="section">
+            <div style="font-size: 2.5rem; margin-bottom: 20px;">🌻 🌻 🌻</div>
+            <h2 style="font-style: italic; color: var(--stem-green); font-weight: normal;">How I See You</h2>
+            <div class="description-box">
+                "When you walk into a room, everything just feels brighter. There’s nothing else I want in those moments than just to keep looking at you. I love your nerdiness, your brown eyes, your curly hair and especially your nose, I know what other people might say, but to me, it's perfect. It's my favorite feature about you because it is what makes you perfect."
+                <br><br>
+                "I even love the way you can’t quite pronounce 'sh' properly when it's twice in a word. I’ll never stop teasing you about that Bihari accent coming out hehe, but I wouldn't change a single thing. To me, you're a whole field of sunflowers."
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="polaroid-container">
+                <div class="polaroid">
+                    <img src="Images/Image1.jpg" alt="Memory">
+                    <p>My favourite memory... here you are wearing that flower that we exchanged hehe</p>
+                </div>
+                <div class="polaroid" style="transform: rotate(2deg);">
+                    <img src="Images/Image2.jpg" alt="Memory">
+                    <p>Forever listening to your yapping... and I wouldn't have it any other way.</p>
+                </div>
+            </div>
+        </section>
+
+        <div id="final-action-area" class="section">
+            <button class="pardon-btn" onclick="handleForgiveness()">I Forgive You</button>
+        </div>
+
+        <section class="section">
+            <h3 style="color: var(--stem-green); font-weight: normal; font-style: italic;">Our Anniversary</h3>
+            <div id="countdown">
+                <div class="time-box"><span id="days" class="time-num">00</span><span class="time-label">Days</span></div>
+                <div class="time-box"><span id="hours" class="time-num">00</span><span class="time-label">Hrs</span></div>
+                <div class="time-box"><span id="mins" class="time-num">00</span><span class="time-label">Min</span></div>
+                <div class="time-box"><span id="secs" class="time-num">00</span><span class="time-label">Sec</span></div>
+            </div>
+        </section>
+
+        <footer>Made with love for A</footer>
+    </div>
+
     <script>
-        const message = "I'm so incredibly sorry... please forgive me? 🥺";
-        let charIndex = 0;
-        let typingInterval;
-
-        function type() {
-            const typingElement = document.getElementById("typing-text");
-            if (typingElement && charIndex < message.length) {
-                typingElement.innerHTML += message.charAt(charIndex);
-                charIndex++;
-                typingInterval = setTimeout(type, 80);
+        document.addEventListener('mousemove', function(e) {
+            if (document.getElementById('contentContainer').classList.contains('visible')) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.innerHTML = '🍂'; 
+                petal.style.left = e.clientX + 'px';
+                petal.style.top = e.clientY + 'px';
+                document.body.appendChild(petal);
+                setTimeout(() => { petal.remove(); }, 1000);
             }
+        });
+
+        // Your updated list of 18 reasons
+        const reasons = [
+            "You have the prettiest eyes I've ever seen.",
+            "The way your whole face lights up when you yap about something you love.",
+            "I could listen to you talk about anything for hours.",
+            "You just make everything better simply by being there.",
+            "I promise to always make sure you have momos (with extra chutney).",
+            "That tiny nose is actually perfect on you.",
+            "I love that you're a whole field of sunflowers to me.",
+            "The fact that you chose me makes me the luckiest person.",
+            "Your random nerdy facts.",
+            "I love that we can have deep conversations, and then just yap about nonsense.",
+            "You make me want to be the best version of myself.",
+            "The flower we exchanged that you wore... I'll never forget it.",
+            "I promise to always listen to your 'yapping', it's my favourite soundtrack.",
+            "Because you are my home.",
+            "Your beautiful heart.",
+            "The way you look at me.",
+            "I adore how passionately you feel about everything.",
+            "Simply... because you are A."
+        ];
+
+        let deck = [];
+        let seenCount = 0;
+
+        function shuffleDeck() {
+            deck = [...reasons].sort(() => Math.random() - 0.5);
         }
-        document.addEventListener('DOMContentLoaded', type);
 
-        function createHeart() {
-            const container = document.getElementById("heart-box");
-            if (!container) return;
-            const heart = document.createElement("div");
-            heart.className = "heart";
-            heart.innerHTML = `<span style="color: #ff4d6d;">❤️</span><span class="heart-char">A</span>`;
-            heart.style.left = Math.random() * 100 + "vw";
-            heart.style.animationDuration = (Math.random() * 2 + 3) + "s";
-            container.appendChild(heart);
-            setTimeout(() => heart.remove(), 4000);
-        }
+        function showReason() {
+            const box = document.getElementById('reasonBox');
+            const btn = document.getElementById('smileBtn');
+            const counterText = document.getElementById('counter');
 
-        function revealSurprise() {
-            clearTimeout(typingInterval);
-
-            for(let i = 0; i < 15; i++) {
-                setTimeout(createHeart, i * 100);
+            if (deck.length === 0) {
+                shuffleDeck();
             }
-            setInterval(createHeart, 500);
 
-            document.getElementById("hidden-content").style.display = "block";
-            document.getElementById("scroll-hint").style.display = "block";
-            document.getElementById("mainBtn").style.display = "none";
-            
-            document.getElementById("typing-text").innerHTML = `
-                YAYAYAYYAYAYAYY! You're the best! 
-                <span class="heart-with-a">❤️<span class="inner-a">A</span></span>
-            `;
+            const currentReason = deck.pop();
+            seenCount++;
 
-            document.getElementById("main-gif-box").innerHTML = `
-                <div class="tenor-gif-embed" data-postid="998738995151584503" data-share-method="host" data-aspect-ratio="1.20219" data-width="100%">
-                    <a href="https://tenor.com/view/milk-and-mocha-gif-998738995151584503">Milk And Mocha Sticker</a>
+            box.classList.remove('show');
+            btn.innerText = "Next smile!";
+
+            if (seenCount <= 18) {
+                counterText.innerText = `You've found ${seenCount} of 18 smiles!`;
+            } else {
+                counterText.innerText = `Seeing them again because I love you that much!`;
+            }
+
+            setTimeout(() => {
+                box.innerText = currentReason;
+                box.classList.add('show');
+            }, 100);
+        }
+
+        shuffleDeck();
+
+        function openLetter() {
+            document.getElementById('envelopeWrapper').classList.add('open');
+            setTimeout(() => {
+                document.getElementById('envelopeWrapper').style.display = 'none';
+                document.getElementById('contentContainer').classList.add('visible');
+            }, 800);
+        }
+
+        function handleForgiveness() {
+            const area = document.getElementById('final-action-area');
+            area.innerHTML = `
+                <div class="handwritten-note">
+                    <div class="heart-a">❤️</div>
+                    <p>Thank you for being so amazing. ❤️</p>
+                    <p>I'm headed to get us some momos now. See you soon!</p>
                 </div>
             `;
-            const script = document.createElement("script");
-            script.src = "https://tenor.com/embed.js";
-            script.async = true;
-            document.body.appendChild(script);
+            document.body.style.transition = "background-color 3s";
+            document.body.style.backgroundColor = "#fff9e6";
+            for (let i = 0; i < 40; i++) { createBurst(); }
+        }
+
+        function createBurst() {
+            const el = document.createElement('div');
+            el.innerHTML = Math.random() > 0.5 ? '🌻' : '❤️';
+            el.style.position = 'fixed';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.top = '100vh';
+            el.style.fontSize = '25px';
+            el.style.zIndex = '2000';
+            document.body.appendChild(el);
+            const anim = el.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: `translateY(-110vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+            ], { duration: Math.random() * 2000 + 2000, easing: 'ease-out' });
+            anim.onfinish = () => el.remove();
         }
 
         function updateTimer() {
@@ -271,15 +450,10 @@
             let target = new Date(now.getFullYear(), 9, 10); 
             if (now > target) target.setFullYear(now.getFullYear() + 1);
             const diff = target - now;
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            document.getElementById("days").innerText = d.toString().padStart(2, '0');
-            document.getElementById("hours").innerText = h.toString().padStart(2, '0');
-            document.getElementById("mins").innerText = m.toString().padStart(2, '0');
-            document.getElementById("secs").innerText = s.toString().padStart(2, '0');
+            document.getElementById("days").innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("mins").innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById("secs").innerText = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
         }
         setInterval(updateTimer, 1000);
         updateTimer();
